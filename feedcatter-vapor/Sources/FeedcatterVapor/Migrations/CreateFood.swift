@@ -20,5 +20,6 @@ struct CreateFood: AsyncMigration {
 
     func revert(on database: any Database) async throws {
         try await database.schema("foods").delete()
+        try await database.enum("food_state").delete()
     }
 }
