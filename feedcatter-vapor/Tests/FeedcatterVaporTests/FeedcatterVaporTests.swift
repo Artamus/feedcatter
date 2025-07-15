@@ -1,6 +1,7 @@
 import Fluent
 import Testing
 import VaporTesting
+import FluentSQLiteDriver
 
 @testable import FeedcatterVapor
 
@@ -8,6 +9,7 @@ import VaporTesting
 struct FeedcatterVaporTests {
     private func withApp(_ test: (Application) async throws -> Void) async throws {
         let app = try await Application.make(.testing)
+        app.databases.use(.sqlite(.memory), as: .sqlite)
         do {
             try await configure(app)
             try await app.autoMigrate()

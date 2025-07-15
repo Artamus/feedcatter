@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "FeedcatterVapor",
     platforms: [
-       .macOS(.v13)
+        .macOS(.v13)
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -15,6 +15,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.8.0"),
         // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+        .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
     ],
     targets: [
         .executableTarget(
@@ -33,12 +34,15 @@ let package = Package(
             dependencies: [
                 .target(name: "FeedcatterVapor"),
                 .product(name: "VaporTesting", package: "vapor"),
+                .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
             ],
             swiftSettings: swiftSettings
-        )
+        ),
     ]
 )
 
-var swiftSettings: [SwiftSetting] { [
-    .enableUpcomingFeature("ExistentialAny"),
-] }
+var swiftSettings: [SwiftSetting] {
+    [
+        .enableUpcomingFeature("ExistentialAny")
+    ]
+}
