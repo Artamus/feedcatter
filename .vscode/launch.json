@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:feedcatter}/feedcatter-vapor",
+      "name": "Debug FeedcatterVapor (feedcatter-vapor)",
+      "program": "${workspaceFolder:feedcatter}/feedcatter-vapor/.build/debug/FeedcatterVapor",
+      "preLaunchTask": "swift: Build Debug FeedcatterVapor (feedcatter-vapor)"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:feedcatter}/feedcatter-vapor",
+      "name": "Release FeedcatterVapor (feedcatter-vapor)",
+      "program": "${workspaceFolder:feedcatter}/feedcatter-vapor/.build/release/FeedcatterVapor",
+      "preLaunchTask": "swift: Build Release FeedcatterVapor (feedcatter-vapor)"
+    }
+  ]
+}
