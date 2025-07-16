@@ -52,6 +52,43 @@ struct FeedcatterVaporTests {
         }
     }
 
+    @Test("deletes a food")
+    func deleteFood() async throws {
+        try await withApp { app in
+            let foodModel = FoodModel(
+                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
+            try await foodModel.save(on: app.db)
+
+            try await app.testing().test(
+                .DELETE, "foods/\(foodModel.id!)",
+                afterResponse: { res async throws in
+                    #expect(res.status == .noContent)
+                    let models = try await FoodModel.query(on: app.db).all()
+                    #expect(models.count == 0)
+                })
+        }
+    }
+
+    @Test("lists foods")
+    func listsFoods() async throws {
+        try await withApp { app in
+            let foodModel = FoodModel(
+                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
+            try await foodModel.save(on: app.db)
+            let foodModelTwo = FoodModel(
+                name: "Kana", state: DbFoodState.available, availablePercentage: 1.0)
+            try await foodModelTwo.save(on: app.db)
+
+            try await app.testing().test(
+                .GET, "foods",
+                afterResponse: { res async throws in
+                    #expect(res.status == .ok)
+                    let models = try await FoodModel.query(on: app.db).all()
+                    #expect(models.map { $0.name } == ["Ookeanikala", "Kana"])
+                })
+        }
+    }
+
     @Test("fails creating a meal from a food that doesn't exist")
     func failsNonExistentFood() async throws {
         try await withApp { app in
@@ -111,43 +148,6 @@ struct FeedcatterVaporTests {
                                 id: foodModel.id!, createdAt: foodModel.createdAt!,
                                 name: "Ookeanikala",
                                 state: FoodDTOState.partiallyAvailable(percentage: 0.5)))
-                })
-        }
-    }
-
-    @Test("deletes a food")
-    func deleteFood() async throws {
-        try await withApp { app in
-            let foodModel = FoodModel(
-                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
-            try await foodModel.save(on: app.db)
-
-            try await app.testing().test(
-                .DELETE, "foods/\(foodModel.id!)",
-                afterResponse: { res async throws in
-                    #expect(res.status == .noContent)
-                    let models = try await FoodModel.query(on: app.db).all()
-                    #expect(models.count == 0)
-                })
-        }
-    }
-
-    @Test("lists foods")
-    func listsFoods() async throws {
-        try await withApp { app in
-            let foodModel = FoodModel(
-                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
-            try await foodModel.save(on: app.db)
-            let foodModelTwo = FoodModel(
-                name: "Kana", state: DbFoodState.available, availablePercentage: 1.0)
-            try await foodModelTwo.save(on: app.db)
-
-            try await app.testing().test(
-                .GET, "foods",
-                afterResponse: { res async throws in
-                    #expect(res.status == .ok)
-                    let models = try await FoodModel.query(on: app.db).all()
-                    #expect(models.map { $0.name } == ["Ookeanikala", "Kana"])
                 })
         }
     }
