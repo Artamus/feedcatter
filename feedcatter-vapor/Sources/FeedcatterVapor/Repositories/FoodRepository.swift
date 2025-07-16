@@ -43,9 +43,10 @@ final class FluentFoodRepository: FoodRepository {
     }
 
     func all(on db: any Database) async throws -> [Food] {
-        let foodModels = try await FoodModel.query(on: db).filter(
-            \.$state ~~ [.available, .partiallyAvailable]
-        ).all()
+        let foodModels = try await FoodModel.query(on: db)
+            .filter(\.$state ~~ [.available, .partiallyAvailable])
+            .sort(\.$createdAt)
+            .all()
         return try foodModels.map { try $0.toDomain() }
     }
 }

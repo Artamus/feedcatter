@@ -89,6 +89,72 @@ struct FeedcatterVaporTests {
         }
     }
 
+    @Test("fails getting a food suggestion when there are no foods")
+    func failsSuggestionsWithNoFoods() async throws {
+        try await withApp { app in
+            try await app.testing().test(
+                .GET, "foods/suggestion",
+                afterResponse: { res async throws in
+                    #expect(res.status == .notFound)
+                })
+        }
+    }
+
+    @Test("gets an open food as a suggestion if it exists")
+    func getsSuggestionOfOpenFood() async throws {
+        try await withApp { app in
+
+            let availableFoodModel = FoodModel(
+                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
+            try await availableFoodModel.save(on: app.db)
+            let partiallyAvailableFoodModel = FoodModel(
+                name: "Tšikkin", state: DbFoodState.partiallyAvailable, availablePercentage: 0.5)
+            try await partiallyAvailableFoodModel.save(on: app.db)
+
+            try await app.testing().test(
+                .GET, "foods/suggestion",
+                afterResponse: { res async throws in
+                    #expect(res.status == .ok)
+
+                    let responseDto = try res.content.decode(FoodDTO.self)
+                    #expect(
+                        responseDto
+                            == FoodDTO(
+                                id: partiallyAvailableFoodModel.id!,
+                                createdAt: partiallyAvailableFoodModel.createdAt!, name: "Tšikkin",
+                                state: FoodDTOState.partiallyAvailable(percentage: 0.5)))
+                })
+        }
+    }
+
+    @Test("gets the oldest food as a suggestion")
+    func getsSuggestionOfOldestFood() async throws {
+        try await withApp { app in
+
+            let olderFood = FoodModel(
+                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
+            try await olderFood.save(on: app.db)
+            let newerFood = FoodModel(
+                name: "Tšikkin", state: DbFoodState.available, availablePercentage: 1.0)
+            try await newerFood.save(on: app.db)
+
+            try await app.testing().test(
+                .GET, "foods/suggestion",
+                afterResponse: { res async throws in
+                    #expect(res.status == .ok)
+
+                    let response = try res.content.decode(FoodDTO.self)
+                    #expect(
+                        response
+                            == FoodDTO(
+                                id: olderFood.id!,
+                                createdAt: olderFood.createdAt!,
+                                name: "Ookeanikala",
+                                state: FoodDTOState.available))
+                })
+        }
+    }
+
     @Test("fails creating a meal from a food that doesn't exist")
     func failsNonExistentFood() async throws {
         try await withApp { app in

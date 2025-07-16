@@ -41,7 +41,7 @@ class Food {
     }
 }
 
-enum FoodState {
+enum FoodState: Equatable {
     case available
     case partiallyAvailable(percentage: Double)
     case eaten

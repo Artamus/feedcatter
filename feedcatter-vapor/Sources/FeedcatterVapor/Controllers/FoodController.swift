@@ -10,6 +10,7 @@ struct FoodController: RouteCollection {
             food.delete(use: self.delete)
         }
 
+        foods.get("suggestion", use: self.getFoodSuggestion)
         foods.post("meal", use: self.createMeal)
     }
 
@@ -39,6 +40,27 @@ struct FoodController: RouteCollection {
         try await req.application.repositories.food.delete(id: foodId, on: req.db)
 
         return .noContent
+    }
+
+    @Sendable
+    func getFoodSuggestion(req: Request) async throws -> FoodDTO {
+        let foods = try await req.application.repositories.food.all(on: req.db)
+        if foods.isEmpty {
+            throw Abort(.notFound, reason: "no foods found")
+        }
+
+        let openedFoods = foods.filter { food in
+            switch food.state {
+            case .partiallyAvailable: return true
+            default: return false
+            }
+        }
+
+        if !openedFoods.isEmpty {
+            return FoodDTO(from: openedFoods.first!)
+        }
+
+        return FoodDTO(from: foods.first!)
     }
 
     @Sendable
