@@ -106,6 +106,7 @@ struct FeedcatterVaporTests {
                     #expect(res.status == .ok)
                     let updatedFoodModel = try await FoodModel.find(foodModel.id!, on: app.db)
                     #expect(updatedFoodModel?.state == DbFoodState.partiallyAvailable)
+                    #expect(updatedFoodModel?.availablePercentage == 0.5)
                 })
         }
     }
