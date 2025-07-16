@@ -104,9 +104,13 @@ struct FeedcatterVaporTests {
                 },
                 afterResponse: { res async throws in
                     #expect(res.status == .ok)
-                    let updatedFoodModel = try await FoodModel.find(foodModel.id!, on: app.db)
-                    #expect(updatedFoodModel?.state == DbFoodState.partiallyAvailable)
-                    #expect(updatedFoodModel?.availablePercentage == 0.5)
+                    let responseDto = try res.content.decode(FoodDTO.self)
+                    #expect(
+                        responseDto
+                            == FoodDTO(
+                                id: foodModel.id!, createdAt: foodModel.createdAt!,
+                                name: "Ookeanikala",
+                                state: FoodDTOState.partiallyAvailable(percentage: 0.5)))
                 })
         }
     }
