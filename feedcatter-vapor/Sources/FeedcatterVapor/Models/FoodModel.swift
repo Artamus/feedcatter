@@ -52,6 +52,21 @@ final class FoodModel: Model, @unchecked Sendable {
         return Food(id: self.id!, createdAt: self.createdAt!, name: self.name, state: foodState)
     }
 
+    func apply(_ food: Food) {
+        self.state =
+            switch food.state {
+            case .available: DbFoodState.available
+            case .partiallyAvailable: DbFoodState.partiallyAvailable
+            case .eaten: DbFoodState.eaten
+            }
+        self.availablePercentage =
+            switch food.state {
+            case .available: 1.0
+            case .partiallyAvailable(let percentage): percentage
+            case .eaten: 0.0
+            }
+    }
+
     convenience init(from domain: Food) {
         let foodState =
             switch domain.state {

@@ -9,6 +9,8 @@ struct FoodController: RouteCollection {
         foods.group(":foodID") { food in
             food.delete(use: self.delete)
         }
+
+        foods.post("meal", use: self.createMeal)
     }
 
     @Sendable
@@ -37,5 +39,27 @@ struct FoodController: RouteCollection {
         try await req.application.repositories.food.delete(id: foodId, on: req.db)
 
         return .noContent
+    }
+
+    @Sendable
+    func createMeal(req: Request) async throws -> FoodDTO {
+        let mealData = try req.content.decode(CreateMealDTO.self)
+
+        guard
+            let food = try await req.application.repositories.food.find(
+                id: mealData.food, on: req.db)
+        else {
+            throw Abort(.notFound, reason: "food \(mealData.food) not found")
+        }
+
+        do {
+            try food.consume(percentage: mealData.percentage)
+        } catch FoodError.noneRemaining {
+            throw Abort(.preconditionFailed, reason: "unable to consume food that is already eaten")
+        }
+
+        let updatedFood = try await req.application.repositories.food.update(food, on: req.db)
+
+        return FoodDTO(from: updatedFood)
     }
 }

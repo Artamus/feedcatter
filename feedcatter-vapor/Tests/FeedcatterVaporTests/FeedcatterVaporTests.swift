@@ -1,7 +1,7 @@
 import Fluent
+import FluentSQLiteDriver
 import Testing
 import VaporTesting
-import FluentSQLiteDriver
 
 @testable import FeedcatterVapor
 
@@ -48,6 +48,64 @@ struct FeedcatterVaporTests {
                     #expect(res.status == .ok)
                     let models = try await FoodModel.query(on: app.db).all()
                     #expect(models.map({ $0.name }) == [createFoodDto.name])
+                })
+        }
+    }
+
+    @Test("fails creating a meal from a food that doesn't exist")
+    func failsNonExistentFood() async throws {
+        try await withApp { app in
+            let createMealDto = CreateMealDTO(food: 420, percentage: 1.0)
+            try await app.testing().test(
+                .POST, "foods/meal",
+                beforeRequest: { req in
+                    try req.content.encode(createMealDto)
+                },
+                afterResponse: { res async throws in
+                    #expect(res.status == .notFound)
+                })
+        }
+    }
+
+    @Test("fails creating a meal from an eaten food")
+    func failsEatenFood() async throws {
+        try await withApp { app in
+            let foodModel = FoodModel(
+                name: "Ookeanikala", state: DbFoodState.eaten, availablePercentage: 0.0)
+            try await foodModel.save(on: app.db)
+
+            let createMealDto = CreateMealDTO(food: foodModel.id!, percentage: 0.5)
+            try await app.testing().test(
+                .POST, "foods/meal",
+                beforeRequest: { req in
+                    try req.content.encode(createMealDto)
+                },
+                afterResponse: { res async throws in
+                    #expect(res.status == .preconditionFailed)
+                    let updatedFoodModel = try await FoodModel.find(foodModel.id!, on: app.db)
+                    #expect(updatedFoodModel?.state == foodModel.state)
+                    #expect(updatedFoodModel?.availablePercentage == foodModel.availablePercentage)
+                })
+        }
+    }
+
+    @Test("creates a meal from an available food")
+    func createsMealFromPartial() async throws {
+        try await withApp { app in
+            let foodModel = FoodModel(
+                name: "Ookeanikala", state: DbFoodState.available, availablePercentage: 1.0)
+            try await foodModel.save(on: app.db)
+
+            let createMealDto = CreateMealDTO(food: foodModel.id!, percentage: 0.5)
+            try await app.testing().test(
+                .POST, "foods/meal",
+                beforeRequest: { req in
+                    try req.content.encode(createMealDto)
+                },
+                afterResponse: { res async throws in
+                    #expect(res.status == .ok)
+                    let updatedFoodModel = try await FoodModel.find(foodModel.id!, on: app.db)
+                    #expect(updatedFoodModel?.state == DbFoodState.partiallyAvailable)
                 })
         }
     }
