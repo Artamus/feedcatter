@@ -32,3 +32,4 @@ swift test
 - Swift tooling on VSCode is atrocious. It constantly gets bogged down in WSL2. This could be a WSL2 issue, but I do know Go ran fine.
 - Using an ORM was a mistake, it brings in a horrible programming model if you don't want to do exact thing it was made for.
 - Vapor testing is weirdly structured and wraps stuff too much.
+- Didn't really test out error handling, so TBD on whether I like that.
