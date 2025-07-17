@@ -1,0 +1,13 @@
+{
+  "generate": {
+    "clients": false,
+    "servers": true,
+    "messages": true
+  },
+  "protoc": {
+    "executablePath": "/usr/bin/protoc",
+    "importPaths": [
+      "./"
+    ]
+  }
+}

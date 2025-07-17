@@ -17,6 +17,24 @@
       "name": "Release FeedcatterVapor (feedcatter-vapor)",
       "program": "${workspaceFolder:feedcatter}/feedcatter-vapor/.build/release/FeedcatterVapor",
       "preLaunchTask": "swift: Build Release FeedcatterVapor (feedcatter-vapor)"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:feedcatter}/feedcatter-grpc",
+      "name": "Debug feedcatter-grpc (feedcatter-grpc)",
+      "program": "${workspaceFolder:feedcatter}/feedcatter-grpc/.build/debug/feedcatter-grpc",
+      "preLaunchTask": "swift: Build Debug feedcatter-grpc (feedcatter-grpc)"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:feedcatter}/feedcatter-grpc",
+      "name": "Release feedcatter-grpc (feedcatter-grpc)",
+      "program": "${workspaceFolder:feedcatter}/feedcatter-grpc/.build/release/feedcatter-grpc",
+      "preLaunchTask": "swift: Build Release feedcatter-grpc (feedcatter-grpc)"
     }
   ]
 }
