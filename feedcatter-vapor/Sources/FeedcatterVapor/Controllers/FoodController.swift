@@ -45,22 +45,17 @@ struct FoodController: RouteCollection {
     @Sendable
     func getFoodSuggestion(req: Request) async throws -> FoodDTO {
         let foods = try await req.application.repositories.food.all(on: req.db)
+
         if foods.isEmpty {
             throw Abort(.notFound, reason: "no foods found")
         }
 
-        let openedFoods = foods.filter { food in
-            switch food.state {
-            case .partiallyAvailable: return true
-            default: return false
-            }
+        let suggestion = suggestFood(choice: foods)
+        if suggestion == nil {
+            throw Abort(.internalServerError, reason: "unable to suggest food")
         }
 
-        if !openedFoods.isEmpty {
-            return FoodDTO(from: openedFoods.first!)
-        }
-
-        return FoodDTO(from: foods.first!)
+        return FoodDTO(from: suggestion!)
     }
 
     @Sendable

@@ -1,6 +1,6 @@
 import Foundation
 
-class Food {
+class Food: Equatable {
     var id: Int?
     var createdAt: Date?
     var name: String
@@ -38,6 +38,10 @@ class Food {
 
         case .eaten: throw FoodError.noneRemaining
         }
+    }
+
+    static func == (lhs: Food, rhs: Food) -> Bool {
+        return lhs.id == rhs.id
     }
 }
 
