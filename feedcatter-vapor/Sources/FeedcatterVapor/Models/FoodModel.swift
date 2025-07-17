@@ -53,33 +53,23 @@ final class FoodModel: Model, @unchecked Sendable {
     }
 
     func apply(_ food: Food) {
-        self.state =
-            switch food.state {
-            case .available: DbFoodState.available
-            case .partiallyAvailable: DbFoodState.partiallyAvailable
-            case .eaten: DbFoodState.eaten
-            }
-        self.availablePercentage =
-            switch food.state {
-            case .available: 1.0
-            case .partiallyAvailable(let percentage): percentage
-            case .eaten: 0.0
-            }
+        let (foodState, availablePercentage) = food.state.dbState()
+
+        self.state = foodState
+        self.availablePercentage = availablePercentage
+    }
+
+    convenience init(from domain: CreatedFood) {
+        let (foodState, availablePercentage) = domain.state.dbState()
+
+        self.init(
+            id: nil, createdAt: nil, name: domain.name, state: foodState,
+            availablePercentage: availablePercentage
+        )
     }
 
     convenience init(from domain: Food) {
-        let foodState =
-            switch domain.state {
-            case .available: DbFoodState.available
-            case .partiallyAvailable: DbFoodState.partiallyAvailable
-            case .eaten: DbFoodState.eaten
-            }
-        let availablePercentage =
-            switch domain.state {
-            case .available: 1.0
-            case .partiallyAvailable(let percentage): percentage
-            case .eaten: 0.0
-            }
+        let (foodState, availablePercentage) = domain.state.dbState()
 
         self.init(
             id: domain.id, createdAt: domain.createdAt, name: domain.name, state: foodState,
@@ -97,4 +87,24 @@ enum DbFoodState: String, Codable {
     case available
     case partiallyAvailable
     case eaten
+}
+
+extension FoodState {
+    fileprivate func dbState() -> (DbFoodState, Double) {
+        let dbState =
+            switch self {
+            case .available: DbFoodState.available
+            case .partiallyAvailable: DbFoodState.partiallyAvailable
+            case .eaten: DbFoodState.eaten
+            }
+
+        let availablePercentage =
+            switch self {
+            case .available: 1.0
+            case .partiallyAvailable(let percentage): percentage
+            case .eaten: 0.0
+            }
+        
+        return (dbState, availablePercentage)
+    }
 }

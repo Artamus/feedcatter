@@ -18,7 +18,7 @@ struct FoodController: RouteCollection {
     func create(req: Request) async throws -> FoodDTO {
         let foodData = try req.content.decode(CreateFoodDTO.self)
 
-        let food = Food(name: foodData.name)
+        let food = Food.create(name: foodData.name)
         let createdFood = try await req.application.repositories.food.create(food, on: req.db)
 
         return FoodDTO(from: createdFood)

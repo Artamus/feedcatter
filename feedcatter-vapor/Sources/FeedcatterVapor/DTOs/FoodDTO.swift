@@ -18,8 +18,8 @@ struct FoodDTO: Content, Equatable {
     }
 
     init(from domain: Food) {
-        self.id = domain.id!
-        self.createdAt = domain.createdAt!
+        self.id = domain.id
+        self.createdAt = domain.createdAt
         self.name = domain.name
         self.state =
             switch domain.state {

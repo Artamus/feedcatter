@@ -2,7 +2,7 @@ import Fluent
 import Vapor
 
 protocol FoodRepository: Sendable {
-    func create(_ food: Food, on db: any Database) async throws -> Food
+    func create(_ food: CreatedFood, on db: any Database) async throws -> Food
     func find(id: Int, on db: any Database) async throws -> Food?
     func update(_ food: Food, on db: any Database) async throws -> Food
     func delete(id: Int, on db: any Database) async throws
@@ -11,7 +11,7 @@ protocol FoodRepository: Sendable {
 
 final class FluentFoodRepository: FoodRepository {
 
-    func create(_ food: Food, on db: any Database) async throws -> Food {
+    func create(_ food: CreatedFood, on db: any Database) async throws -> Food {
         let foodModel = FoodModel(from: food)
         try await foodModel.save(on: db)
         return try foodModel.toDomain()

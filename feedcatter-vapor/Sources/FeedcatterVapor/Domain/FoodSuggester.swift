@@ -22,7 +22,7 @@ func suggestFood(choice foods: [Food]) -> Food? {
     let mostFrequentFood =
         foods
         .filter { $0.name == mostFrequentFoodName }
-        .sorted(by: { $0.createdAt! < $1.createdAt! })
+        .sorted(by: { $0.createdAt < $1.createdAt })
 
     return mostFrequentFood.first
 }
