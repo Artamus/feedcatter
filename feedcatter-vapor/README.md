@@ -25,3 +25,10 @@ swift test
 - [Vapor Documentation](https://docs.vapor.codes)
 - [Vapor GitHub](https://github.com/vapor)
 - [Vapor Community](https://github.com/vapor-community)
+
+
+## Thoughts on using this.
+
+- Swift tooling on VSCode is atrocious. It constantly gets bogged down in WSL2. This could be a WSL2 issue, but I do know Go ran fine.
+- Using an ORM was a mistake, it brings in a horrible programming model if you don't want to do exact thing it was made for.
+- Vapor testing is weirdly structured and wraps stuff too much.
