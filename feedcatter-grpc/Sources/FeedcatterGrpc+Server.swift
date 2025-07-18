@@ -1,9 +1,28 @@
 import GRPCCore
 import GRPCNIOTransportHTTP2
+import Logging
+import PostgresKit
 
 extension Feedcatter {
     func runServer() async throws {
-        let feedcatter = FeedcatterService()
+        let configuration = SQLPostgresConfiguration(
+            hostname: "localhost",
+            username: "vapor_username",
+            password: "vapor_password",
+            database: "vapor_database",
+            tls: .disable
+        )
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        let pools = EventLoopGroupConnectionPool(
+            source: PostgresConnectionSource(sqlConfiguration: configuration),
+            on: eventLoopGroup
+        )
+
+        let foodRepository = DbFoodRepository()
+        let feedcatter = FeedcatterService(
+            foodRepository: foodRepository,
+            dbPool: pools.database(logger: Logger(label: "postgres")))
+
         let server = GRPCServer(
             transport: .http2NIOPosix(
                 address: .ipv4(host: "127.0.0.1", port: 31415),
@@ -21,5 +40,8 @@ extension Feedcatter {
                 print("Feedcatter server listening on \(address)")
             }
         }
+
+        try! await pools.shutdownAsync()
+        try! await eventLoopGroup.shutdownGracefully()
     }
 }

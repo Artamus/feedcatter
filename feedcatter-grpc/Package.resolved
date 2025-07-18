@@ -1,6 +1,15 @@
 {
-  "originHash" : "63d0a23f45216431fd6abd22c83895de17138749c8738e99995bfc867ca4ff8d",
+  "originHash" : "e3fa3e104bf642816e8b1908f654505a3e92bd5a4280897b235074b71eeb6ba3",
   "pins" : [
+    {
+      "identity" : "async-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/async-kit.git",
+      "state" : {
+        "revision" : "e048c8ee94967e8d8a1c2ec0e1156d6f7fa34d31",
+        "version" : "1.20.0"
+      }
+    },
     {
       "identity" : "grpc-swift-2",
       "kind" : "remoteSourceControl",
@@ -26,6 +35,33 @@
       "state" : {
         "revision" : "df605cde2957657a078eb754ed24f3a0e05d3f54",
         "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "postgres-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/postgres-kit.git",
+      "state" : {
+        "revision" : "f4d4b9e8db9a907644d67d6a7ecb5f0314eec1ad",
+        "version" : "2.14.0"
+      }
+    },
+    {
+      "identity" : "postgres-nio",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/postgres-nio.git",
+      "state" : {
+        "revision" : "ccb25dcc428587224633a79c0ce0430eeac3dc0f",
+        "version" : "1.26.2"
+      }
+    },
+    {
+      "identity" : "sql-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vapor/sql-kit.git",
+      "state" : {
+        "revision" : "baf0d8684a43f16cd11ebcc67300c8ab5cb5d078",
+        "version" : "3.33.0"
       }
     },
     {
@@ -116,6 +152,15 @@
       "state" : {
         "revision" : "3d8596ed08bd13520157f0355e35caed215ffbfa",
         "version" : "1.6.3"
+      }
+    },
+    {
+      "identity" : "swift-metrics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-metrics.git",
+      "state" : {
+        "revision" : "4c83e1cdf4ba538ef6e43a9bbd0bcc33a0ca46e3",
+        "version" : "2.7.0"
       }
     },
     {
