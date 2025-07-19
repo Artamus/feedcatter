@@ -7,9 +7,9 @@ extension Feedcatter {
     func runServer() async throws {
         let configuration = SQLPostgresConfiguration(
             hostname: "localhost",
-            username: "vapor_username",
-            password: "vapor_password",
-            database: "vapor_database",
+            username: "postgres",
+            password: "postgres",
+            database: "feedcatter",
             tls: .disable
         )
         let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)

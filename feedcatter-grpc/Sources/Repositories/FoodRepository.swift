@@ -19,18 +19,18 @@ final class DbFoodRepository: FoodRepository {
         let insertedRow = try await db.insert(into: self.table)
             .columns(self.allColumns)
             .values(
-                SQLLiteral.default, SQLLiteral.default, SQLBind(food.name), SQLBind(state),
+                SQLLiteral.default, SQLBind(Date()), SQLBind(food.name),
+                SQLLiteral.string(state.rawValue),
                 SQLBind(availablePercentage)
             )
-            .returning("*")
-            .first()
+            .returning(SQLLiteral.all)
+            .first(decoding: FoodRow.self)
 
-        if insertedRow == nil {
+        if let insertedRow {
+            return insertedRow.toFood()
+        } else {
             throw FoodRepositoryError.insertFailed
         }
-
-        let decodedRow = try insertedRow!.decode(model: FoodRow.self)
-        return decodedRow.toFood()
     }
 
     func find(id: Int, on db: any SQLDatabase) async throws -> Food? {
@@ -38,10 +38,9 @@ final class DbFoodRepository: FoodRepository {
             .from(self.table)
             .columns(self.allColumns)
             .where("id", .equal, SQLBind(id))
-            .first()
+            .first(decoding: FoodRow.self)
 
-        let decodedRow = try maybeRow?.decode(model: FoodRow.self)
-        return decodedRow?.toFood()
+        return maybeRow?.toFood()
     }
 
     func update(_ food: Food, on db: any SQLDatabase) async throws -> Food {
@@ -55,7 +54,7 @@ final class DbFoodRepository: FoodRepository {
         let (state, availablePercentage) = dbStateOf(food.state)
         try await db.update(self.table)
             .set("name", to: food.name)
-            .set("state", to: state)
+            .set("state", to: SQLLiteral.string(state.rawValue))
             .set("available_percentage", to: availablePercentage)
             .where("id", .equal, food.id)
             .run()
@@ -80,11 +79,12 @@ final class DbFoodRepository: FoodRepository {
         let rows = try await db.select()
             .from(self.table)
             .columns(self.allColumns)
-            .where("state", .in, SQLBind([DbFoodState.available, DbFoodState.partiallyAvailable]))
-            .all()
+            .where(
+                "state", .in, SQLRaw("('available'::food_state, 'partiallyAvailable'::food_state)")
+            )
+            .all(decoding: FoodRow.self)
 
-        let decodedRows = try rows.map { try $0.decode(model: FoodRow.self) }
-        return decodedRows.map { $0.toFood() }
+        return rows.map { $0.toFood() }
     }
 }
 
@@ -93,12 +93,12 @@ enum FoodRepositoryError: Error {
     case notFound
 }
 
-private func dbStateOf(_ state: FoodState) -> (String, Double) {
+private func dbStateOf(_ state: FoodState) -> (DbFoodState, Double) {
     let dbState =
         switch state {
-        case .available: "available"
-        case .partiallyAvailable: "partially_available"
-        case .eaten: "eaten"
+        case .available: DbFoodState.available
+        case .partiallyAvailable: DbFoodState.partiallyAvailable
+        case .eaten: DbFoodState.eaten
         }
 
     let availablePercentage =
@@ -118,6 +118,14 @@ struct FoodRow: Codable {
     var state: DbFoodState
     var availablePercentage: Double
 
+    enum CodingKeys: String, CodingKey {
+        case id
+        case createdAt = "created_at"
+        case name
+        case state
+        case availablePercentage = "available_percentage"
+    }
+
     func toFood() -> Food {
         let foodState =
             switch self.state {
@@ -132,7 +140,7 @@ struct FoodRow: Codable {
 }
 
 enum DbFoodState: String, Codable {
-    case available = "available"
-    case partiallyAvailable = "partially_available"
-    case eaten = "eaten"
+    case available
+    case partiallyAvailable
+    case eaten
 }

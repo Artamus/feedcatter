@@ -35,7 +35,6 @@ struct FeedcatterService: Feedcatter_FeedcatterService.SimpleServiceProtocol {
         -> Feedcatter_ListFoodsResponse
     {
         let foods = try await self.foodRepository.all(on: self.dbPool.sql())
-
         return Feedcatter_ListFoodsResponse.with {
             $0.foods = foods.map { $0.toProtoFood() }
         }
@@ -80,7 +79,6 @@ struct FeedcatterService: Feedcatter_FeedcatterService.SimpleServiceProtocol {
         }
 
         let updatedFood = try await self.foodRepository.update(food, on: self.dbPool.sql())
-
         return Feedcatter_FeedFoodResponse.with {
             $0.food = updatedFood.toProtoFood()
         }
