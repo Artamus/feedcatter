@@ -38,3 +38,9 @@ swift test
 
 Breakpoint test with k6 crashed at about 950 VUs.
 Memory usage was around 75 MiB.
+
+100 VUs 5m: 3500/s [avg=28.02ms min=8.21ms med=32.19ms max=71.14ms p(90)=38.21ms p(95)=39.87ms]
+
+500 VUs 5m: 3500/s [avg=142.95ms min=59.34ms med=172.46ms max=254.36ms p(90)=186.22ms p(95)=190.05ms]
+
+750 VUs 5m: 3500/s [avg=212.29ms min=76.11ms med=255.77ms max=365.23ms p(90)=278.05ms p(95)=284.54ms]

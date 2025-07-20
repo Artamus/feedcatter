@@ -18,6 +18,8 @@ iterations: 3140743 5126.944933/s
 grpc_req_duration: avg=63.98ms  min=1.48ms med=57.38ms max=13.46s p(90)=101.62ms p(95)=126.92ms
 ```
 
+100 VUs 5m: 3500/s [avg=26.62ms min=1.9ms  med=30.46ms max=162.96ms p(90)=36.4ms  p(95)=39.92ms]
+
 500 VUs 5m: 3500/s [avg=128.25ms min=2.1ms   med=163.63ms max=220.26ms p(90)=182.25ms p(95)=186.33ms]
 
 1000 VUs 5m: 5300/s [avg=41.08ms  min=1.61ms med=31.72ms max=702.58ms p(90)=64.48ms  p(95)=92.13ms]

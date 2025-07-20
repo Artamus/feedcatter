@@ -2,7 +2,7 @@ import { Client, StatusOK } from "k6/net/grpc";
 import { check, sleep } from "k6";
 
 export const options = {
-  vus: 500,
+  vus: 100,
   duration: "5m",
 };
 
