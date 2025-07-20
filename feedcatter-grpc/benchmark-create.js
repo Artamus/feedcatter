@@ -3,7 +3,7 @@ import { check, sleep } from "k6";
 
 export const options = {
   vus: 500,
-  iterations: 10000
+  duration: "5m",
 };
 
 const client = new Client();

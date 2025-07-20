@@ -13,7 +13,6 @@ struct FeedcatterService: Feedcatter_FeedcatterService.SimpleServiceProtocol {
     func createFood(request: Feedcatter_CreateFoodRequest, context: ServerContext) async throws
         -> Feedcatter_CreateFoodResponse
     {
-
         let createdFood = Food.create(name: request.name)
         let food = try await self.foodRepository.create(createdFood, on: self.dbPool.sql())
 
@@ -25,7 +24,6 @@ struct FeedcatterService: Feedcatter_FeedcatterService.SimpleServiceProtocol {
     func deleteFood(request: Feedcatter_DeleteFoodRequest, context: ServerContext) async throws
         -> Feedcatter_DeleteFoodResponse
     {
-
         try await self.foodRepository.delete(id: Int(request.food), on: self.dbPool.sql())
 
         return Feedcatter_DeleteFoodResponse()
@@ -62,7 +60,6 @@ struct FeedcatterService: Feedcatter_FeedcatterService.SimpleServiceProtocol {
     func feedFood(request: Feedcatter_FeedFoodRequest, context: ServerContext) async throws
         -> Feedcatter_FeedFoodResponse
     {
-
         guard
             let food = try await self.foodRepository.find(
                 id: Int(request.food), on: self.dbPool.sql())

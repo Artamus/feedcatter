@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:feedcatter-grpc}",
+            "name": "Debug feedcatter-grpc",
+            "program": "${workspaceFolder:feedcatter-grpc}/.build/debug/feedcatter-grpc",
+            "preLaunchTask": "swift: Build Debug feedcatter-grpc"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:feedcatter-grpc}",
+            "name": "Release feedcatter-grpc",
+            "program": "${workspaceFolder:feedcatter-grpc}/.build/release/feedcatter-grpc",
+            "preLaunchTask": "swift: Build Release feedcatter-grpc"
+        }
+    ]
+}
