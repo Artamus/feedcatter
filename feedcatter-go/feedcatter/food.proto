@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package feedcatter;
 
-option go_package = "github.com/Artamus/feedcatter/feedcatter-go/feedcatter";
+option go_package = "github.com/Artamus/feedcatter/feedcatter-go/feedcatter;feedcatter";
 
 import "google/protobuf/timestamp.proto";
 

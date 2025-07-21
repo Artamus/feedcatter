@@ -478,7 +478,7 @@ const file_feedcatter_service_proto_rawDesc = "" +
 	"DeleteFood\x12\x1d.feedcatter.DeleteFoodRequest\x1a\x1e.feedcatter.DeleteFoodResponse\"\x00\x12J\n" +
 	"\tListFoods\x12\x1c.feedcatter.ListFoodsRequest\x1a\x1d.feedcatter.ListFoodsResponse\"\x00\x12P\n" +
 	"\vSuggestFood\x12\x1e.feedcatter.SuggestFoodRequest\x1a\x1f.feedcatter.SuggestFoodResponse\"\x00\x12G\n" +
-	"\bFeedFood\x12\x1b.feedcatter.FeedFoodRequest\x1a\x1c.feedcatter.FeedFoodResponse\"\x00B8Z6github.com/Artamus/feedcatter/feedcatter-go/feedcatterb\x06proto3"
+	"\bFeedFood\x12\x1b.feedcatter.FeedFoodRequest\x1a\x1c.feedcatter.FeedFoodResponse\"\x00BCZAgithub.com/Artamus/feedcatter/feedcatter-go/feedcatter;feedcatterb\x06proto3"
 
 var (
 	file_feedcatter_service_proto_rawDescOnce sync.Once

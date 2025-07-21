@@ -7,12 +7,13 @@
 package feedcatter
 
 import (
-	timestamp "github.com/golang/protobuf/ptypes/timestamp"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -167,7 +168,7 @@ const file_feedcatter_food_proto_rawDesc = "" +
 	"\x11STATE_UNSPECIFIED\x10\x00\x12\r\n" +
 	"\tAVAILABLE\x10\x01\x12\x17\n" +
 	"\x13PARTIALLY_AVAILABLE\x10\x02\x12\t\n" +
-	"\x05EATEN\x10\x03B8Z6github.com/Artamus/feedcatter/feedcatter-go/feedcatterb\x06proto3"
+	"\x05EATEN\x10\x03BCZAgithub.com/Artamus/feedcatter/feedcatter-go/feedcatter;feedcatterb\x06proto3"
 
 var (
 	file_feedcatter_food_proto_rawDescOnce sync.Once
