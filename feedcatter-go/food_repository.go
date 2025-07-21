@@ -29,6 +29,7 @@ func (r *databaseFoodRepository) Create(ctx context.Context, food CreatedFood) (
 	}
 
 	insertRow := FoodRow{
+		CreatedAt:           time.Now(),
 		Name:                food.Name,
 		State:               dbFoodState,
 		AvailablePercentage: food.AvailablePercentage,
@@ -110,7 +111,7 @@ func (r *databaseFoodRepository) Delete(ctx context.Context, id int32) error {
 
 func (r *databaseFoodRepository) All(ctx context.Context) ([]*Food, error) {
 	var models []FoodRow
-	err := r.db.NewSelect().Model(models).Where("state IN (?, ?)", stateAvailable, statePartiallyAvailable).Scan(ctx)
+	err := r.db.NewSelect().Model(&models).Where("state IN (?, ?)", stateAvailable, statePartiallyAvailable).Scan(ctx)
 	if err != nil {
 		return make([]*Food, 0), err
 	}
@@ -136,7 +137,7 @@ type FoodRow struct {
 	ID                  int32       `bun:"id,pk,autoincrement"`
 	CreatedAt           time.Time   `bun:"created_at,notnull,default:current_timestamp"`
 	Name                string      `bun:"name"`
-	State               dbFoodState `bun:"food_state"`
+	State               dbFoodState `bun:"state"`
 	AvailablePercentage float64     `bun:"available_percentage"`
 }
 
@@ -157,7 +158,7 @@ var allDbFoodStates = []dbFoodState{
 func (s dbFoodState) Value() (driver.Value, error) {
 	return string(s), nil
 }
-func (fs *dbFoodState) Scan(src interface{}) error {
+func (fs *dbFoodState) Scan(src any) error {
 	switch s := src.(type) {
 	case []byte:
 		*fs = dbFoodState(s)
