@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package feedcatter;
+
+option go_package = "github.com/Artamus/feedcatter/feedcatter-go/feedcatter";
+
+import "feedcatter/food.proto";
+
+message CreateFoodRequest {
+    string name = 1;
+}
+message CreateFoodResponse {
+    Food food = 1;
+}
+
+message DeleteFoodRequest {
+    int32 food = 1;
+}
+message DeleteFoodResponse {
+}
+
+message ListFoodsRequest {
+}
+message ListFoodsResponse {
+    repeated Food foods = 1;
+}
+
+message SuggestFoodRequest {
+}
+message SuggestFoodResponse {
+    Food food = 1;
+}
+
+message FeedFoodRequest {
+    int32 food = 1;
+    double percentage = 2;
+}
+message FeedFoodResponse {
+    Food food = 1;
+}
+
+service FeedcatterService {
+    rpc CreateFood(CreateFoodRequest) returns (CreateFoodResponse) {}
+    rpc DeleteFood(DeleteFoodRequest) returns (DeleteFoodResponse) {}
+    rpc ListFoods(ListFoodsRequest) returns (ListFoodsResponse) {}
+    rpc SuggestFood(SuggestFoodRequest) returns (SuggestFoodResponse) {}
+    rpc FeedFood(FeedFoodRequest) returns (FeedFoodResponse) {}
+}
