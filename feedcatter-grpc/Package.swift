@@ -7,7 +7,7 @@ let package = Package(
     name: "feedcatter-grpc",
     platforms: [.macOS(.v13)],
     dependencies: [
-        .package(url: "https://github.com/grpc/grpc-swift-2.git", from: "2.0.0"),
+        .package(url: "https://github.com/grpc/grpc-swift-2.git", from: "2.1.0"),
         .package(url: "https://github.com/grpc/grpc-swift-protobuf.git", from: "2.0.0"),
         .package(url: "https://github.com/grpc/grpc-swift-nio-transport.git", from: "2.0.0"),
         .package(url: "https://github.com/vapor/postgres-kit.git", from: "2.0.0"),
