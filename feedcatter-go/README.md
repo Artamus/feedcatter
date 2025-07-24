@@ -23,10 +23,10 @@ grpc_req_duration: avg=1.55s min=1.37ms med=1.54s max=3.5s p(90)=3.05s p(95)=3.2
 ### Suggest food
 Memory usage was ~450 MiB at 2000 VUs, proportionally lower for others.
 
-100 VUs 5m: [avg=5.16ms min=302.24µs med=4.62ms max=50.55ms p(90)=9.49ms p(95)=11.31ms]
+100 VUs 5m: 11000/s [avg=5.16ms min=302.24µs med=4.62ms max=50.55ms p(90)=9.49ms p(95)=11.31ms]
 
-500 VUs 5m: [avg=25.8ms min=334.34µs med=24.81ms max=156.44ms p(90)=42.45ms p(95)=49.35ms]
+500 VUs 5m: 12500/s [avg=25.8ms min=334.34µs med=24.81ms max=156.44ms p(90)=42.45ms p(95)=49.35ms]
 
-1000 VUs 5m: [avg=53.21ms min=292.91µs med=52.11ms max=318.08ms p(90)=85.96ms  p(95)=99.02ms]
+1000 VUs 5m: 12600/s [avg=53.21ms min=292.91µs med=52.11ms max=318.08ms p(90)=85.96ms  p(95)=99.02ms]
 
-2000 VUs 5m: [avg=111.56ms min=286.69µs med=111.88ms max=783.7ms p(90)=170.47ms p(95)=194.37ms]
+2000 VUs 5m: 12500/s [avg=111.56ms min=286.69µs med=111.88ms max=783.7ms p(90)=170.47ms p(95)=194.37ms]
