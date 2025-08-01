@@ -11,8 +11,11 @@ func SuggestFood(foods []*Food) *Food {
 
 	openedFoods := make([]*Food, 0)
 	for _, food := range foods {
-		if food.State == StatePartiallyAvailable {
-			openedFoods = append(openedFoods, food)
+		switch foodState := food.State.(type) {
+		case *AvailableState:
+			if foodState.RemainingPercentage < 1.0 {
+				openedFoods = append(openedFoods, food)
+			}
 		}
 	}
 	if len(openedFoods) > 0 {

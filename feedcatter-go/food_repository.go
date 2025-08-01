@@ -32,7 +32,7 @@ func (r *databaseFoodRepository) Create(ctx context.Context, food CreatedFood) (
 		CreatedAt:           time.Now(),
 		Name:                food.Name,
 		State:               dbFoodState,
-		AvailablePercentage: food.AvailablePercentage,
+		AvailablePercentage: food.State.RemainingPercentage,
 	}
 
 	_, err = r.db.NewInsert().Model(&insertRow).Returning("*").Exec(ctx)
@@ -77,13 +77,17 @@ func (r *databaseFoodRepository) Update(ctx context.Context, food Food) (*Food, 
 	if err != nil {
 		return nil, err
 	}
+	dbAvailablePercentage, err := dbAvailablePercentageOf(food.State)
+	if err != nil {
+		return nil, err
+	}
 
 	updateRow := FoodRow{
 		ID:                  food.Id,
 		CreatedAt:           food.CreatedAt,
 		Name:                food.Name,
 		State:               dbFoodState,
-		AvailablePercentage: food.AvailablePercentage,
+		AvailablePercentage: dbAvailablePercentage,
 	}
 
 	_, err = r.db.NewUpdate().Model(updateRow).WherePK().Exec(ctx)
@@ -175,44 +179,56 @@ func (fs *dbFoodState) Scan(src any) error {
 }
 
 func foodOf(row FoodRow) (*Food, error) {
-	foodState, err := foodStateOf(row.State)
+	foodState, err := foodStateOf(row.State, row.AvailablePercentage)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Food{
-		Id:                  row.ID,
-		CreatedAt:           row.CreatedAt,
-		Name:                row.Name,
-		State:               foodState,
-		AvailablePercentage: row.AvailablePercentage,
+		Id:        row.ID,
+		CreatedAt: row.CreatedAt,
+		Name:      row.Name,
+		State:     foodState,
 	}, nil
 }
 
-func foodStateOf(state dbFoodState) (FoodState, error) {
+func foodStateOf(state dbFoodState, availablePercentage float64) (FoodState, error) {
 	switch state {
 	case stateAvailable:
-		return StateAvailable, nil
+		return AvailableState{RemainingPercentage: 1.0}, nil
 	case statePartiallyAvailable:
-		return StatePartiallyAvailable, nil
+		return AvailableState{RemainingPercentage: availablePercentage}, nil
 	case stateEaten:
-		return StateEaten, nil
+		return EatenState{}, nil
 	default:
-		return StateEaten, fmt.Errorf("invalid food state: %s", state)
+		return EatenState{}, fmt.Errorf("invalid food state: %v", state)
 	}
 }
 
 func dbFoodStateOf(state FoodState) (dbFoodState, error) {
-	switch state {
-	case StateAvailable:
-		return stateAvailable, nil
-	case StatePartiallyAvailable:
-		return statePartiallyAvailable, nil
-	case StateEaten:
+	switch foodState := state.(type) {
+	case *AvailableState:
+		if foodState.RemainingPercentage >= 1.0 {
+			return stateAvailable, nil
+		} else {
+			return statePartiallyAvailable, nil
+		}
+	case *EatenState:
 		return stateEaten, nil
 	}
 
-	return stateEaten, fmt.Errorf("invalid food state: %d", state)
+	return stateEaten, fmt.Errorf("invalid food state: %v", state)
+}
+
+func dbAvailablePercentageOf(state FoodState) (float64, error) {
+	switch foodState := state.(type) {
+	case *AvailableState:
+		return foodState.RemainingPercentage, nil
+	case *EatenState:
+		return 0.0, nil
+	}
+
+	return 0.0, fmt.Errorf("invalid food state: %v", state)
 }
 
 func NewDatabaseFoodRepository(db *bun.DB) FoodRepository {

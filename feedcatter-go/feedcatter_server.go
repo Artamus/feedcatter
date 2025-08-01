@@ -106,26 +106,48 @@ func protoFoodOf(food *Food) (*pb.Food, error) {
 	if err != nil {
 		return nil, err
 	}
+	availablePercentage, err := availablePercentageOf(food.State)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.Food{
 		Id:                  food.Id,
 		CreatedAt:           timestamppb.New(food.CreatedAt),
 		Name:                food.Name,
 		State:               protoFoodState,
-		AvailablePercentage: food.AvailablePercentage,
+		AvailablePercentage: availablePercentage,
 	}, nil
 }
 
 func protoFoodStateOf(foodState FoodState) (pb.Food_FoodState, error) {
-	switch foodState {
-	case StateAvailable:
-		return pb.Food_AVAILABLE, nil
-	case StatePartiallyAvailable:
-		return pb.Food_PARTIALLY_AVAILABLE, nil
-	case StateEaten:
+	switch state := foodState.(type) {
+	case *AvailableState:
+		{
+			if state.RemainingPercentage >= 1.0 {
+				return pb.Food_AVAILABLE, nil
+			} else {
+				return pb.Food_PARTIALLY_AVAILABLE, nil
+			}
+		}
+
+	case *EatenState:
 		return pb.Food_EATEN, nil
 	}
 
-	return pb.Food_EATEN, fmt.Errorf("unknown FoodState value: %d", foodState)
+	return pb.Food_STATE_UNSPECIFIED, fmt.Errorf("unknown FoodState value: %d", foodState)
+}
+
+func availablePercentageOf(foodState FoodState) (float64, error) {
+	switch state := foodState.(type) {
+	case *AvailableState:
+		return state.RemainingPercentage, nil
+
+	case *EatenState:
+		return 0.0, nil
+	}
+
+	return 0.0, fmt.Errorf("unknown FoodState value: %d", foodState)
 }
 
 func NewServer(foodRepo FoodRepository) *feedcatterServer {

@@ -6,59 +6,53 @@ import (
 )
 
 type Food struct {
-	Id                  int32
-	CreatedAt           time.Time
-	Name                string
-	State               FoodState
-	AvailablePercentage float64
+	Id        int32
+	CreatedAt time.Time
+	Name      string
+	State     FoodState
 }
 
-type FoodState int
+type FoodState interface {
+	isFoodState()
+}
 
-const (
-	StateAvailable FoodState = iota
-	StatePartiallyAvailable
-	StateEaten
-)
+type AvailableState struct {
+	RemainingPercentage float64
+}
+
+func (a AvailableState) isFoodState() {}
+
+type EatenState struct{}
+
+func (a EatenState) isFoodState() {}
 
 func (f *Food) Consume(percentage float64) error {
-	switch f.State {
-	case StateAvailable:
+	switch foo := f.State.(type) {
+	case *AvailableState:
 		{
-			if percentage >= 1.0 {
-				f.State = StateEaten
-				f.AvailablePercentage = 0.0
+			if percentage >= foo.RemainingPercentage {
+				f.State = &EatenState{}
 			} else {
-				f.State = StatePartiallyAvailable
-				f.AvailablePercentage = 1.0 - percentage
+				f.State = &AvailableState{RemainingPercentage: foo.RemainingPercentage - percentage}
 			}
 		}
-	case StatePartiallyAvailable:
+	case *EatenState:
 		{
-			if f.AvailablePercentage > percentage {
-				f.AvailablePercentage = f.AvailablePercentage - percentage
-			} else {
-				f.State = StateEaten
-				f.AvailablePercentage = 0.0
-			}
+			return fmt.Errorf("no food remaining to be eaten")
 		}
-	case StateEaten:
-		return fmt.Errorf("no food remaining to be eaten")
 	}
 
 	return nil
 }
 
 type CreatedFood struct {
-	Name                string
-	State               FoodState
-	AvailablePercentage float64
+	Name  string
+	State AvailableState
 }
 
 func CreateFood(name string) CreatedFood {
 	return CreatedFood{
-		Name:                name,
-		State:               StateAvailable,
-		AvailablePercentage: 1.0,
+		Name:  name,
+		State: AvailableState{RemainingPercentage: 1.0},
 	}
 }

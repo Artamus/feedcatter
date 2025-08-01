@@ -15,10 +15,10 @@ func TestSuggestsNothingIfEmpty(t *testing.T) {
 
 func TestPrefersPartiallyEaten(t *testing.T) {
 	availableFood := &Food{
-		Id: 1, CreatedAt: time.Now(), Name: "Ookeanikala", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 1, CreatedAt: time.Now(), Name: "Ookeanikala", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 	partiallyEatenFood := &Food{
-		Id: 2, CreatedAt: time.Now(), Name: "Ookeanikala", State: StatePartiallyAvailable, AvailablePercentage: 0.5,
+		Id: 2, CreatedAt: time.Now(), Name: "Ookeanikala", State: &AvailableState{RemainingPercentage: 0.5},
 	}
 
 	suggestion := SuggestFood([]*Food{availableFood, partiallyEatenFood})
@@ -30,13 +30,13 @@ func TestPrefersPartiallyEaten(t *testing.T) {
 
 func TestPrefersMostAbundant(t *testing.T) {
 	chicken := &Food{
-		Id: 1, CreatedAt: time.UnixMilli(1000), Name: "Kana", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 1, CreatedAt: time.UnixMilli(1000), Name: "Kana", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 	olderOceanFish := &Food{
-		Id: 2, CreatedAt: time.UnixMilli(2000), Name: "Ookeanikala", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 2, CreatedAt: time.UnixMilli(2000), Name: "Ookeanikala", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 	newerOceanFish := &Food{
-		Id: 3, CreatedAt: time.UnixMilli(5000), Name: "Ookeanikala", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 3, CreatedAt: time.UnixMilli(5000), Name: "Ookeanikala", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 
 	suggestion := SuggestFood([]*Food{chicken, olderOceanFish, newerOceanFish})
@@ -48,13 +48,13 @@ func TestPrefersMostAbundant(t *testing.T) {
 
 func TestPrefersOldestMostAbundant(t *testing.T) {
 	chicken := &Food{
-		Id: 1, CreatedAt: time.UnixMilli(1000), Name: "Kana", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 1, CreatedAt: time.UnixMilli(1000), Name: "Kana", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 	olderOceanFish := &Food{
-		Id: 2, CreatedAt: time.UnixMilli(2000), Name: "Ookeanikala", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 2, CreatedAt: time.UnixMilli(2000), Name: "Ookeanikala", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 	newerOceanFish := &Food{
-		Id: 3, CreatedAt: time.UnixMilli(5000), Name: "Ookeanikala", State: StateAvailable, AvailablePercentage: 1.0,
+		Id: 3, CreatedAt: time.UnixMilli(5000), Name: "Ookeanikala", State: &AvailableState{RemainingPercentage: 1.0},
 	}
 
 	suggestion := SuggestFood([]*Food{chicken, newerOceanFish, olderOceanFish}) // Older ocean fish goes last to ensure we don't just check based on order.
