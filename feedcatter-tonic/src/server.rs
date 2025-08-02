@@ -20,7 +20,7 @@ pub mod feedcatter_pb {
 mod food;
 mod food_repository;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct MyFeedcatterService {
     food_repository: Arc<Mutex<food_repository::FoodRepository>>,
 }
@@ -109,7 +109,10 @@ fn pb_food_state_of(food_state: FoodState) -> (feedcatter_pb::food::FoodState, f
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
-    let feedcatter = MyFeedcatterService::default();
+
+    let feedcatter = MyFeedcatterService {
+        food_repository: Arc::new(Mutex::new(food_repository::FoodRepository::new())),
+    };
 
     Server::builder()
         .add_service(FeedcatterServiceServer::new(feedcatter))
