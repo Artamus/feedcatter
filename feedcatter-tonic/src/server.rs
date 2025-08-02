@@ -44,10 +44,12 @@ impl FeedcatterService for MyFeedcatterService {
 
     async fn delete_food(
         &self,
-        _request: Request<DeleteFoodRequest>,
+        req: Request<DeleteFoodRequest>,
     ) -> Result<Response<DeleteFoodResponse>, Status> {
-        let resp = DeleteFoodResponse {};
-        Ok(Response::new(resp))
+        let mut repository_guard = self.food_repository.lock().unwrap();
+        repository_guard.delete(req.into_inner().food);
+
+        Ok(Response::new(DeleteFoodResponse {}))
     }
 
     async fn list_foods(

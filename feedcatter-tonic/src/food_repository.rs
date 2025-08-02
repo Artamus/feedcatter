@@ -21,6 +21,10 @@ impl FoodRepository {
         return food;
     }
 
+    pub fn delete(&mut self, id: i32) {
+        self.foods.retain(|food| food.id != id);
+    }
+
     pub fn new() -> FoodRepository {
         FoodRepository {
             next_id: 1,
