@@ -36,10 +36,9 @@ impl FeedcatterService for MyFeedcatterService {
         let mut repository_guard = self.food_repository.lock().unwrap();
         let food = repository_guard.create(create_food);
 
-        let resp = CreateFoodResponse {
+        Ok(Response::new(CreateFoodResponse {
             food: Some(proto_food_of(food)),
-        };
-        Ok(Response::new(resp))
+        }))
     }
 
     async fn delete_food(
@@ -56,8 +55,14 @@ impl FeedcatterService for MyFeedcatterService {
         &self,
         _request: Request<ListFoodsRequest>,
     ) -> Result<Response<ListFoodsResponse>, Status> {
-        let resp = ListFoodsResponse { foods: vec![] };
-        Ok(Response::new(resp))
+        let repository_guard = self.food_repository.lock().unwrap();
+        let foods: Vec<feedcatter_pb::Food> = repository_guard
+            .all()
+            .iter()
+            .map(|food| proto_food_of(food.clone()))
+            .collect();
+
+        Ok(Response::new(ListFoodsResponse { foods: foods }))
     }
 
     async fn suggest_food(

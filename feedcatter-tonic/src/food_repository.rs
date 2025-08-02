@@ -1,16 +1,16 @@
 use time::OffsetDateTime;
 
-use crate::food;
+use crate::food::{CreateFood, Food};
 
 #[derive(Debug)]
 pub struct FoodRepository {
     next_id: i32,
-    foods: Vec<food::Food>,
+    foods: Vec<Food>,
 }
 
 impl FoodRepository {
-    pub fn create(&mut self, create_food: food::CreateFood) -> food::Food {
-        let food = food::Food {
+    pub fn create(&mut self, create_food: CreateFood) -> Food {
+        let food = Food {
             id: self.next_id,
             created_at: OffsetDateTime::now_utc(),
             name: create_food.name,
@@ -23,6 +23,10 @@ impl FoodRepository {
 
     pub fn delete(&mut self, id: i32) {
         self.foods.retain(|food| food.id != id);
+    }
+
+    pub fn all(&self) -> Vec<Food> {
+        return self.foods.clone();
     }
 
     pub fn new() -> FoodRepository {
