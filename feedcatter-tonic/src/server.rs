@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use prost_types::Timestamp;
 use time::OffsetDateTime;
 use tonic::{Request, Response, Status, transport::Server};
@@ -23,7 +21,7 @@ mod food_suggester;
 
 #[derive(Debug)]
 pub struct MyFeedcatterService {
-    food_repository: Arc<Mutex<food_repository::FoodRepository>>,
+    food_repository: food_repository::FoodRepository,
 }
 
 #[tonic::async_trait]
@@ -34,8 +32,7 @@ impl FeedcatterService for MyFeedcatterService {
     ) -> Result<Response<CreateFoodResponse>, Status> {
         let create_food = food::Food::create(req.into_inner().name);
 
-        let mut repository_guard = self.food_repository.lock().unwrap();
-        let food = repository_guard.create(create_food);
+        let food = self.food_repository.create(create_food);
 
         Ok(Response::new(CreateFoodResponse {
             food: Some(proto_food_of(food)),
@@ -46,8 +43,7 @@ impl FeedcatterService for MyFeedcatterService {
         &self,
         req: Request<DeleteFoodRequest>,
     ) -> Result<Response<DeleteFoodResponse>, Status> {
-        let mut repository_guard = self.food_repository.lock().unwrap();
-        repository_guard.delete(req.into_inner().food);
+        self.food_repository.delete(req.into_inner().food);
 
         Ok(Response::new(DeleteFoodResponse {}))
     }
@@ -56,8 +52,8 @@ impl FeedcatterService for MyFeedcatterService {
         &self,
         _req: Request<ListFoodsRequest>,
     ) -> Result<Response<ListFoodsResponse>, Status> {
-        let repository_guard = self.food_repository.lock().unwrap();
-        let foods: Vec<feedcatter_pb::Food> = repository_guard
+        let foods: Vec<feedcatter_pb::Food> = self
+            .food_repository
             .all()
             .iter()
             .map(|food| proto_food_of(food.clone()))
@@ -70,8 +66,7 @@ impl FeedcatterService for MyFeedcatterService {
         &self,
         _req: Request<SuggestFoodRequest>,
     ) -> Result<Response<SuggestFoodResponse>, Status> {
-        let repository_guard = self.food_repository.lock().unwrap();
-        let all_foods = repository_guard.all();
+        let all_foods = self.food_repository.all();
         let suggested_food = food_suggester::suggest_food(all_foods);
 
         match suggested_food {
@@ -127,7 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
 
     let feedcatter = MyFeedcatterService {
-        food_repository: Arc::new(Mutex::new(food_repository::FoodRepository::new())),
+        food_repository: food_repository::FoodRepository::new(),
     };
 
     Server::builder()

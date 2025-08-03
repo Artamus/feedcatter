@@ -1,32 +1,43 @@
+use std::sync::{Arc, Mutex};
+
 use time::OffsetDateTime;
 
 use crate::food::{CreateFood, Food, FoodState};
 
 #[derive(Debug)]
 pub struct FoodRepository {
-    next_id: i32,
-    foods: Vec<Food>,
+    next_id: Arc<Mutex<i32>>,
+    foods: Arc<Mutex<Vec<Food>>>,
 }
 
 impl FoodRepository {
-    pub fn create(&mut self, create_food: CreateFood) -> Food {
+    pub fn create(&self, create_food: CreateFood) -> Food {
+        let mut next_id = self.next_id.lock().unwrap();
+
         let food = Food {
-            id: self.next_id,
+            id: *next_id,
             created_at: OffsetDateTime::now_utc(),
             name: create_food.name,
             state: create_food.state,
         };
-        self.next_id += 1;
-        self.foods.push(food.clone());
+
+        *next_id += 1;
+
+        let mut foods = self.foods.lock().unwrap();
+        foods.push(food.clone());
+
         return food;
     }
 
-    pub fn delete(&mut self, id: i32) {
-        self.foods.retain(|food| food.id != id);
+    pub fn delete(&self, id: i32) {
+        let mut foods = self.foods.lock().unwrap();
+        foods.retain(|food| food.id != id);
     }
 
     pub fn all(&self) -> Vec<Food> {
-        self.foods
+        let foods = self.foods.lock().unwrap();
+
+        foods
             .iter()
             .filter(|food| match food.state {
                 FoodState::Eaten => false,
@@ -38,8 +49,8 @@ impl FoodRepository {
 
     pub fn new() -> FoodRepository {
         FoodRepository {
-            next_id: 1,
-            foods: vec![],
+            next_id: Arc::new(Mutex::new(1)),
+            foods: Arc::new(Mutex::new(vec![])),
         }
     }
 }
