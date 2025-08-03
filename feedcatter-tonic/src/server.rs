@@ -19,6 +19,7 @@ pub mod feedcatter_pb {
 
 mod food;
 mod food_repository;
+mod food_suggester;
 
 #[derive(Debug)]
 pub struct MyFeedcatterService {
@@ -53,7 +54,7 @@ impl FeedcatterService for MyFeedcatterService {
 
     async fn list_foods(
         &self,
-        _request: Request<ListFoodsRequest>,
+        _req: Request<ListFoodsRequest>,
     ) -> Result<Response<ListFoodsResponse>, Status> {
         let repository_guard = self.food_repository.lock().unwrap();
         let foods: Vec<feedcatter_pb::Food> = repository_guard
@@ -67,10 +68,18 @@ impl FeedcatterService for MyFeedcatterService {
 
     async fn suggest_food(
         &self,
-        _request: Request<SuggestFoodRequest>,
+        _req: Request<SuggestFoodRequest>,
     ) -> Result<Response<SuggestFoodResponse>, Status> {
-        let resp = SuggestFoodResponse { food: None };
-        Ok(Response::new(resp))
+        let repository_guard = self.food_repository.lock().unwrap();
+        let all_foods = repository_guard.all();
+        let suggested_food = food_suggester::suggest_food(all_foods);
+
+        match suggested_food {
+            None => Err(Status::internal("unable to suggest food")),
+            Some(food) => Ok(Response::new(SuggestFoodResponse {
+                food: Some(proto_food_of(food)),
+            })),
+        }
     }
 
     async fn feed_food(

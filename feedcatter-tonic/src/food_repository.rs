@@ -1,6 +1,6 @@
 use time::OffsetDateTime;
 
-use crate::food::{CreateFood, Food};
+use crate::food::{CreateFood, Food, FoodState};
 
 #[derive(Debug)]
 pub struct FoodRepository {
@@ -26,7 +26,14 @@ impl FoodRepository {
     }
 
     pub fn all(&self) -> Vec<Food> {
-        return self.foods.clone();
+        self.foods
+            .iter()
+            .filter(|food| match food.state {
+                FoodState::Eaten => false,
+                _ => true,
+            })
+            .cloned()
+            .collect()
     }
 
     pub fn new() -> FoodRepository {
