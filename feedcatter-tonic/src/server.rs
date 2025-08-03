@@ -79,9 +79,27 @@ impl FeedcatterService for MyFeedcatterService {
 
     async fn feed_food(
         &self,
-        _request: Request<FeedFoodRequest>,
+        req: Request<FeedFoodRequest>,
     ) -> Result<Response<FeedFoodResponse>, Status> {
-        let resp = FeedFoodResponse { food: None };
+        let body = req.into_inner();
+
+        let mut food = match self.food_repository.find(body.food) {
+            None => return Err(Status::not_found("food {body.food} not found")),
+            Some(food) => food,
+        };
+
+        let consume_res = food.consume(body.percentage);
+        if consume_res.is_err() {
+            return Err(Status::failed_precondition(
+                "unable to consume food that is already eaten",
+            ));
+        }
+
+        self.food_repository.update(food.clone());
+
+        let resp = FeedFoodResponse {
+            food: Some(proto_food_of(food)),
+        };
         Ok(Response::new(resp))
     }
 }

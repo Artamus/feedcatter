@@ -10,6 +10,28 @@ pub struct Food {
 }
 
 impl Food {
+    pub fn consume(&mut self, percentage: f64) -> Result<(), FoodError> {
+        match self.state {
+            FoodState::Available => {
+                if percentage >= 1.0 {
+                    self.state = FoodState::Eaten
+                } else {
+                    self.state = FoodState::PartiallyAvailable(1.0 - percentage)
+                }
+                Ok(())
+            }
+            FoodState::PartiallyAvailable(remaining_percentage) => {
+                if remaining_percentage <= percentage {
+                    self.state = FoodState::Eaten
+                } else {
+                    self.state = FoodState::PartiallyAvailable(remaining_percentage - percentage)
+                }
+                Ok(())
+            }
+            FoodState::Eaten => Err(FoodError::NoneRemaining),
+        }
+    }
+
     pub fn create(name: String) -> CreateFood {
         CreateFood {
             name: name,
@@ -42,4 +64,8 @@ impl Hash for Food {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
+}
+
+pub enum FoodError {
+    NoneRemaining,
 }

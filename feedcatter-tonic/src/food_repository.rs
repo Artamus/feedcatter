@@ -29,6 +29,24 @@ impl FoodRepository {
         return food;
     }
 
+    pub fn find(&self, id: i32) -> Option<Food> {
+        let foods = self.foods.lock().unwrap();
+        foods.iter().find(|food| food.id == id).cloned()
+    }
+
+    pub fn update(&self, food: Food) {
+        let mut foods = self.foods.lock().unwrap();
+
+        let mut updated_foods: Vec<Food> = foods
+            .iter()
+            .filter(|stored_food| stored_food.id != food.id)
+            .cloned()
+            .collect();
+
+        updated_foods.push(food);
+        *foods = updated_foods;
+    }
+
     pub fn delete(&self, id: i32) {
         let mut foods = self.foods.lock().unwrap();
         foods.retain(|food| food.id != id);
