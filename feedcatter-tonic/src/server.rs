@@ -8,6 +8,7 @@ use feedcatter_pb::{
     CreateFoodRequest, CreateFoodResponse, DeleteFoodRequest, DeleteFoodResponse, FeedFoodRequest,
     FeedFoodResponse, ListFoodsRequest, ListFoodsResponse, SuggestFoodRequest, SuggestFoodResponse,
 };
+use sqlx::postgres::PgPoolOptions;
 
 use crate::food::FoodState;
 
@@ -32,7 +33,7 @@ impl FeedcatterService for MyFeedcatterService {
     ) -> Result<Response<CreateFoodResponse>, Status> {
         let create_food = food::Food::create(req.into_inner().name);
 
-        let food = self.food_repository.create(create_food);
+        let food = self.food_repository.create(create_food).await;
 
         Ok(Response::new(CreateFoodResponse {
             food: Some(proto_food_of(food)),
@@ -43,7 +44,7 @@ impl FeedcatterService for MyFeedcatterService {
         &self,
         req: Request<DeleteFoodRequest>,
     ) -> Result<Response<DeleteFoodResponse>, Status> {
-        self.food_repository.delete(req.into_inner().food);
+        self.food_repository.delete(req.into_inner().food).await;
 
         Ok(Response::new(DeleteFoodResponse {}))
     }
@@ -55,6 +56,7 @@ impl FeedcatterService for MyFeedcatterService {
         let foods: Vec<feedcatter_pb::Food> = self
             .food_repository
             .all()
+            .await
             .iter()
             .map(|food| proto_food_of(food.clone()))
             .collect();
@@ -66,7 +68,7 @@ impl FeedcatterService for MyFeedcatterService {
         &self,
         _req: Request<SuggestFoodRequest>,
     ) -> Result<Response<SuggestFoodResponse>, Status> {
-        let all_foods = self.food_repository.all();
+        let all_foods = self.food_repository.all().await;
         let suggested_food = food_suggester::suggest_food(all_foods);
 
         match suggested_food {
@@ -83,7 +85,7 @@ impl FeedcatterService for MyFeedcatterService {
     ) -> Result<Response<FeedFoodResponse>, Status> {
         let body = req.into_inner();
 
-        let mut food = match self.food_repository.find(body.food) {
+        let mut food = match self.food_repository.find(body.food).await {
             None => return Err(Status::not_found("food {body.food} not found")),
             Some(food) => food,
         };
@@ -95,7 +97,7 @@ impl FeedcatterService for MyFeedcatterService {
             ));
         }
 
-        self.food_repository.update(food.clone());
+        self.food_repository.update(food.clone()).await;
 
         let resp = FeedFoodResponse {
             food: Some(proto_food_of(food)),
@@ -139,9 +141,12 @@ fn pb_food_state_of(food_state: FoodState) -> (feedcatter_pb::food::FoodState, f
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
 
-    let feedcatter = MyFeedcatterService {
-        food_repository: food_repository::FoodRepository::new(),
-    };
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://postgres:postgres@localhost:5432/feedcatter?sslmode=disable")
+        .await?;
+    let food_repository = food_repository::FoodRepository::new(pool);
+    let feedcatter = MyFeedcatterService { food_repository };
 
     Server::builder()
         .add_service(FeedcatterServiceServer::new(feedcatter))
