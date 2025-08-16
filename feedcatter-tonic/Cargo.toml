@@ -17,3 +17,9 @@ tonic-build = "*"
 [[bin]] # Bin to run the Feedcatter gRPC server
 name = "feedcatter-server"
 path = "src/server.rs"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
