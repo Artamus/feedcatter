@@ -36,7 +36,7 @@ impl FeedcatterService for MyFeedcatterService {
         let food = self.food_repository.create(create_food).await;
 
         Ok(Response::new(CreateFoodResponse {
-            food: Some(proto_food_of(food)),
+            food: Some(feedcatter_pb::Food::from(food)),
         }))
     }
 
@@ -58,7 +58,7 @@ impl FeedcatterService for MyFeedcatterService {
             .all()
             .await
             .iter()
-            .map(|food| proto_food_of(food.clone()))
+            .map(|food| feedcatter_pb::Food::from(food.clone()))
             .collect();
 
         Ok(Response::new(ListFoodsResponse { foods: foods }))
@@ -74,7 +74,7 @@ impl FeedcatterService for MyFeedcatterService {
         match suggested_food {
             None => Err(Status::internal("unable to suggest food")),
             Some(food) => Ok(Response::new(SuggestFoodResponse {
-                food: Some(proto_food_of(food)),
+                food: Some(feedcatter_pb::Food::from(food)),
             })),
         }
     }
@@ -100,22 +100,24 @@ impl FeedcatterService for MyFeedcatterService {
         self.food_repository.update(food.clone()).await;
 
         let resp = FeedFoodResponse {
-            food: Some(proto_food_of(food)),
+            food: Some(feedcatter_pb::Food::from(food)),
         };
         Ok(Response::new(resp))
     }
 }
 
-fn proto_food_of(food: food::Food) -> feedcatter_pb::Food {
-    let (pb_food_state, pb_available_percentage) = pb_food_state_of(food.state);
+impl From<food::Food> for feedcatter_pb::Food {
+    fn from(food: food::Food) -> Self {
+        let (pb_food_state, pb_available_percentage) = pb_food_state_of(food.state);
 
-    return feedcatter_pb::Food {
-        id: food.id,
-        created_at: Some(pb_timestamp_of(food.created_at)),
-        name: food.name,
-        state: pb_food_state.into(),
-        available_percentage: pb_available_percentage,
-    };
+        return Self {
+            id: food.id,
+            created_at: Some(pb_timestamp_of(food.created_at)),
+            name: food.name,
+            state: pb_food_state.into(),
+            available_percentage: pb_available_percentage,
+        };
+    }
 }
 
 fn pb_timestamp_of(time: OffsetDateTime) -> Timestamp {
