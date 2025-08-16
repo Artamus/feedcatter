@@ -2,22 +2,18 @@ use std::collections::HashMap;
 
 use crate::food::{Food, FoodState};
 
-pub fn suggest_food(foods: Vec<Food>) -> Option<Food> {
+pub fn suggest_food(foods: &Vec<Food>) -> Option<Food> {
     if foods.is_empty() {
         return None;
     }
 
-    let opened_foods: Vec<Food> = foods
-        .iter()
-        .filter(|food| match food.state {
-            FoodState::PartiallyAvailable(_) => true,
-            _ => false,
-        })
-        .cloned()
-        .collect();
+    let any_opened_food = foods.iter().find(|food| match food.state {
+        FoodState::PartiallyAvailable(_) => true,
+        _ => false,
+    });
 
-    if !opened_foods.is_empty() {
-        return opened_foods.first().cloned();
+    if any_opened_food.is_some() {
+        return any_opened_food.cloned();
     }
 
     let most_frequent_food_name = foods
@@ -49,7 +45,7 @@ mod tests {
 
     #[test]
     fn none_when_empty() {
-        let suggestion = suggest_food(vec![]);
+        let suggestion = suggest_food(&vec![]);
 
         assert_eq!(suggestion, None);
     }
@@ -69,7 +65,7 @@ mod tests {
             state: FoodState::PartiallyAvailable(0.5),
         };
 
-        let suggestion = suggest_food(vec![
+        let suggestion = suggest_food(&vec![
             available_food.clone(),
             partially_available_food.clone(),
         ]);
@@ -98,7 +94,7 @@ mod tests {
             state: FoodState::Available,
         };
 
-        let suggestion = suggest_food(vec![
+        let suggestion = suggest_food(&vec![
             chicken.clone(),
             older_ocean_fish.clone(),
             newer_ocean_fish.clone(),
@@ -128,7 +124,7 @@ mod tests {
             state: FoodState::Available,
         };
 
-        let suggestion = suggest_food(vec![
+        let suggestion = suggest_food(&vec![
             chicken.clone(),
             newer_ocean_fish.clone(),
             older_ocean_fish.clone(), // Older ocean fish goes last to ensure we don't just check based on order.

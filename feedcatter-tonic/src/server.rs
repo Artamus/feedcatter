@@ -69,7 +69,7 @@ impl FeedcatterService for MyFeedcatterService {
         _req: Request<SuggestFoodRequest>,
     ) -> Result<Response<SuggestFoodResponse>, Status> {
         let all_foods = self.food_repository.all().await;
-        let suggested_food = food_suggester::suggest_food(all_foods);
+        let suggested_food = food_suggester::suggest_food(&all_foods);
 
         match suggested_food {
             None => Err(Status::internal("unable to suggest food")),
