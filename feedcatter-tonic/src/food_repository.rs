@@ -27,7 +27,7 @@ RETURNING *
         .await
         .unwrap();
 
-        return food_of(inserted).unwrap();
+        return Food::try_from(inserted).unwrap();
     }
 
     pub async fn find(&self, id: i32) -> Option<Food> {
@@ -39,7 +39,7 @@ WHERE id = $1
         "#,
         )
         .bind(id)
-        .map(|row: PgRow| -> Option<Food> { food_of(row).ok() })
+        .map(|row: PgRow| -> Option<Food> { Food::try_from(row).ok() })
         .fetch_one(&self.db)
         .await
         .ok()?
@@ -80,7 +80,7 @@ FROM foods
 WHERE state IN ('available'::food_state, 'partiallyAvailable'::food_state)
         "#,
         )
-        .map(|row: PgRow| -> Option<Food> { food_of(row).ok() })
+        .map(|row: PgRow| -> Option<Food> { Food::try_from(row).ok() })
         .fetch_all(&self.db)
         .await
         .unwrap()
@@ -105,6 +105,29 @@ enum DbFoodState {
     Eaten,
 }
 
+impl TryFrom<PgRow> for Food {
+    type Error = String;
+
+    fn try_from(value: PgRow) -> Result<Self, Self::Error> {
+        let raw_id: i64 = value.try_get("id").or(Err("cannot get column 'id'"))?;
+        let food_state: DbFoodState = value
+            .try_get("state")
+            .or(Err("cannot get column 'state'"))?;
+        let available_percentage: f64 = value
+            .try_get("available_percentage")
+            .or(Err("cannot get column 'available_percentage'"))?;
+
+        return Ok(Food {
+            id: i32::try_from(raw_id).or(Err("could not convert id to i32"))?,
+            created_at: value
+                .try_get("created_at")
+                .or(Err("cannot get column 'created_at'"))?,
+            name: value.try_get("name").or(Err("cannot get column 'name'"))?,
+            state: food_state_of(food_state, available_percentage),
+        });
+    }
+}
+
 fn db_food_state_of(food_state: FoodState) -> (DbFoodState, f64) {
     match food_state {
         FoodState::Available => (DbFoodState::Available, 1.0),
@@ -121,21 +144,4 @@ fn food_state_of(db_food_state: DbFoodState, available_percentage: f64) -> FoodS
         DbFoodState::PartiallyAvailable => FoodState::PartiallyAvailable(available_percentage),
         DbFoodState::Eaten => FoodState::Eaten,
     }
-}
-
-fn food_of(row: PgRow) -> Result<Food, String> {
-    let raw_id: i64 = row.try_get("id").or(Err("cannot get column 'id'"))?;
-    let food_state: DbFoodState = row.try_get("state").or(Err("cannot get column 'state'"))?;
-    let available_percentage: f64 = row
-        .try_get("available_percentage")
-        .or(Err("cannot get column 'available_percentage'"))?;
-
-    return Ok(Food {
-        id: i32::try_from(raw_id).or(Err("could not convert id to i32"))?,
-        created_at: row
-            .try_get("created_at")
-            .or(Err("cannot get column 'created_at'"))?,
-        name: row.try_get("name").or(Err("cannot get column 'name'"))?,
-        state: food_state_of(food_state, available_percentage),
-    });
 }
