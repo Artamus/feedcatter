@@ -144,7 +144,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
 
     let pool = PgPoolOptions::new()
-        .max_connections(5)
+        .max_connections(16)
         .connect("postgres://postgres:postgres@localhost:5432/feedcatter?sslmode=disable")
         .await?;
     let food_repository = food_repository::FoodRepository::new(pool);

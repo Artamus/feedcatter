@@ -25,7 +25,14 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 
 	dsn := "postgres://postgres:postgres@localhost:5432/feedcatter?sslmode=disable"
-	pool, err := pgxpool.New(context.Background(), dsn)
+
+	dbConfig, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		panic(err)
+	}
+	dbConfig.MaxConns = 16
+
+	pool, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
 	if err != nil {
 		panic(err)
 	}
