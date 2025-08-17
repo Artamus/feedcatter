@@ -122,7 +122,7 @@ func protoFoodOf(food *Food) (*pb.Food, error) {
 
 func protoFoodStateOf(foodState FoodState) (pb.Food_FoodState, error) {
 	switch state := foodState.(type) {
-	case *AvailableState:
+	case AvailableState:
 		{
 			if state.RemainingPercentage >= 1.0 {
 				return pb.Food_AVAILABLE, nil
@@ -131,7 +131,7 @@ func protoFoodStateOf(foodState FoodState) (pb.Food_FoodState, error) {
 			}
 		}
 
-	case *EatenState:
+	case EatenState:
 		return pb.Food_EATEN, nil
 	}
 
@@ -140,10 +140,10 @@ func protoFoodStateOf(foodState FoodState) (pb.Food_FoodState, error) {
 
 func availablePercentageOf(foodState FoodState) (float64, error) {
 	switch state := foodState.(type) {
-	case *AvailableState:
+	case AvailableState:
 		return state.RemainingPercentage, nil
 
-	case *EatenState:
+	case EatenState:
 		return 0.0, nil
 	}
 

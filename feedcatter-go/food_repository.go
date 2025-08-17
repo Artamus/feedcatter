@@ -207,13 +207,13 @@ func foodStateOf(state dbFoodState, availablePercentage float64) (FoodState, err
 
 func dbFoodStateOf(state FoodState) (dbFoodState, error) {
 	switch foodState := state.(type) {
-	case *AvailableState:
+	case AvailableState:
 		if foodState.RemainingPercentage >= 1.0 {
 			return stateAvailable, nil
 		} else {
 			return statePartiallyAvailable, nil
 		}
-	case *EatenState:
+	case EatenState:
 		return stateEaten, nil
 	}
 
@@ -222,9 +222,9 @@ func dbFoodStateOf(state FoodState) (dbFoodState, error) {
 
 func dbAvailablePercentageOf(state FoodState) (float64, error) {
 	switch foodState := state.(type) {
-	case *AvailableState:
+	case AvailableState:
 		return foodState.RemainingPercentage, nil
-	case *EatenState:
+	case EatenState:
 		return 0.0, nil
 	}
 
